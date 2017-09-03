@@ -1,5 +1,5 @@
 ---
-author: "Julian Flowers, Jurgen Schmidt, Brian Ferguson"
+author: "Julian Flowers, Jurgen Schmidt, Brian Ferguson et al"
 output:
   word_document:
     toc: yes
@@ -40,7 +40,7 @@ This paper:
 
 1. Describes the rationale for PH modelling
 2. Presents a stock-take of current modelling activity
-3. Set out the case for a more systematic and resourced approach to modelling in PHE on behalf of PH and the wider PH system with a core modelling team, coordinationg activity within OGDs and across academia, and investment in capacity in capability
+3. Set out the case for a more systematic and resourced approach to modelling in PHE on behalf of PHE and the wider PH system with a core modelling team, coordinating activity within OGDs and across academia, and investment in capacity and capability
 
 ## Summary
 
@@ -48,7 +48,7 @@ PHE has a vital role to play in public health modelling to help central and loca
 
 PHE lacks a coherent modelling strategy for what is rapidly becoming core business. PHE does have access to a range of models of variable utility and quality, and although it has some capacity and capability to run and interpret models developed by others it has no in-house development capacity. As a result it has relied on re-using models produced by others, or commissioning work from academics or private providers. There is inevitable duplication and inconsistency, for example different models coming to widely differening consclusions, models using different input data and so on. 
 
-PHE needs to take advantage of the guidance on Quality Analysis provided by the Aqua Book to assure the quality of models PHE uses for its business rqeuirements. 
+PHE needs to take advantage of the guidance on Quality Analysis provided by the [Aqua Book](https://www.gov.uk/government/publications/the-aqua-book-guidance-on-producing-quality-analysis-for-government) to assure the quality of models PHE uses for its business rqeuirements. 
 
 A strategic approach to modelling would read across to wider strategies on, for example:
 
