@@ -44,14 +44,14 @@ This paper:
 
 ### A typology - some definitions
 
-Can be classified by methods  
+There are many types of quantitative modelling which are relevant to the work of Public Health England and public health practice including:
 
-* System dynamic modelling is a methodology and mathematical modeling technique to frame, understand, and discuss complex issues and problems. Originally developed in the 1950s to help corporate managers improve their understanding of industrial processes, SD is currently being used throughout the public and private sector for policy analysis and design
-* Predictive modelling. Predictive modeling uses statistics to predict outcomes. Most often the event one wants to predict is in the future, but predictive modelling can be applied to any type of unknown event, regardless of when it occurred. It is synonymous with (supervised) machine learning
-* Microsimulation (from microanalytic simulation) is a category of computerized analytical tools that perform highly detailed analysis of activities such as highway traffic flowing through an intersection, financial transactions, or pathogens spreading disease through a population. Microsimulation is often used to evaluate the effects of proposed interventions before they are implemented in the real world. For example, a traffic microsimulation model could be used to evaluate the effectiveness of lengthening a turn lane at an intersection, and thus help decide whether it is worth spending money on actually lengthening the lane.
-* An agent-based model (ABM) is one of a class of computational models for simulating the actions and interactions of autonomous agents (both individual or collective entities such as organizations or groups) with a view to assessing their effects on the system as a whole. It combines elements of game theory, complex systems, emergence, computational sociology, multi-agent systems, and evolutionary programming. Monte Carlo methods are used to introduce randomness. 
-* Forecasting is the process of making predictions of the future based on past and present data and most commonly by analysis of trends.
-* Econometric models are statistical models used in econometrics. An econometric model specifies the statistical relationship that is believed to hold between the various economic quantities pertaining to a particular economic phenomenon under study. An econometric model can be derived from a deterministic economic model by allowing for uncertainty, or from an economic model which itself is stochastic. 
+* *System dynamic modelling* is a methodology and mathematical modeling technique to frame, understand, and discuss complex issues and problems. Originally developed in the 1950s to help corporate managers improve their understanding of industrial processes, SD is currently being used throughout the public and private sector for policy analysis and design
+* *Predictive modelling*. Predictive modeling uses statistics to predict outcomes. Most often the event one wants to predict is in the future, but predictive modelling can be applied to any type of unknown event, regardless of when it occurred. It is synonymous with (supervised) machine learning
+* *Microsimulation* (from microanalytic simulation) is a category of computerized analytical tools that perform highly detailed analysis of activities such as highway traffic flowing through an intersection, financial transactions, or pathogens spreading disease through a population. Microsimulation is often used to evaluate the effects of proposed interventions before they are implemented in the real world. For example, a traffic microsimulation model could be used to evaluate the effectiveness of lengthening a turn lane at an intersection, and thus help decide whether it is worth spending money on actually lengthening the lane.
+* An *agent-based model (ABM)* is one of a class of computational models for simulating the actions and interactions of autonomous agents (both individual or collective entities such as organizations or groups) with a view to assessing their effects on the system as a whole. It combines elements of game theory, complex systems, emergence, computational sociology, multi-agent systems, and evolutionary programming. Monte Carlo methods are used to introduce randomness. 
+* *Forecasting* is the process of making predictions of the future based on past and present data and most commonly by analysis of trends.
+* *Econometric models* are statistical models used in econometrics. An econometric model specifies the statistical relationship that is believed to hold between the various economic quantities pertaining to a particular economic phenomenon under study. An econometric model can be derived from a deterministic economic model by allowing for uncertainty, or from an economic model which itself is stochastic. 
 
 
 ## Why model - the case for modelling?
@@ -138,7 +138,27 @@ There are a number of modelling teams or functions in PHE:
 
 ## Activities in PHE. 
 
-[look up ]
+Much of the modelling work done in PHE involves using or contributing to models created by others - there is very little in-house model development for non-communicable disease or public health risks and determinants. 
+
+```{r, echo=FALSE}
+
+library(pander)
+options(ztable.type = "html")
+
+df_model <- data.frame(`Modelling activity` = c("Global burden of disease", 
+"MidRif (UKHF)", "Economic models", "Predictive models and forecasts"), 
+                       `PHE input` =c("Data provision to IHME, commissioning,  interpetation, networks, explanation,  publication",
+                               "Data input, software development (by UKHF) to make model user friendly for PHE to run, limited projection and simulation", 
+                               "Range of externally developed models for ROI and economic evaluation", 
+                               "Limited activity - early experimentation with machine learning, Commissioned prevalence estimates from Imperial and Southampton")
+
+
+
+df_model %>%
+    knitr::kable(format = "pandoc")
+
+
+```
 
 ## Current activities in the wider PH system
 
