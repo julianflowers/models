@@ -1,16 +1,18 @@
 ---
-title: "Building public health modelling capability and capacity in PHE"
-author: Julian Flowers, Jurgen Schmidt, Brian Ferguson
+author: "Julian Flowers, Jurgen Schmidt, Brian Ferguson"
 output:
   word_document:
-    #reference_docx: data/template2.docx
+    toc: yes
+  pdf_document: 
+    number_sections: yes
+    toc: yes
   html_document:
-    df_print: paged
-  pdf_document: default
-#bib: jf_library.bib
+    number_sections: yes
+    toc: yes
+title: "Building public health modelling capability and capacity in PHE"
 ---
 
-```{r setup}
+```{r setup, include=FALSE}
 
 library(knitcitations)
 library(RefManageR)
@@ -40,9 +42,36 @@ This paper:
 2. Presents a stock-take of current modelling activity
 3. Set out the case for a more systematic and resourced approach to modelling in PHE on behalf of PH and the wider PH system with a core modelling team, coordinationg activity within OGDs and across academia, and investment in capacity in capability
 
+## Summary
+
+PHE has a vital role to play in public health modelling to help central and local governemnt invest approprately in prevention and population health improvement.   
+
+PHE lacks a coherent modelling strategy for what is rapidly becoming core business. PHE does have access to a range of models of variable utility and quality, and although it has some capacity and capability to run and interpret models developed by others it has no in-house development capacity. As a result it has relied on re-using models produced by others, or commissioning work from academics or private providers. There is inevitable duplication and inconsistency, for example different models coming to widely differening consclusions, models using different input data and so on. 
+
+PHE needs to take advantage of the guidance on Quality Analysis provided by the Aqua Book to assure the quality of models PHE uses for its business rqeuirements. 
+
+A strategic approach to modelling would read across to wider strategies on, for example:
+
+* Data - quality assured and open data, building a more comprehensive and systematic population health information system to ensure we have access to all the data we need to deliver our remit
+* Data science - developing the platforms, tools, capacity and skills to make the best use of data we collect or reuse
+
+It will ensure we have the input data to build models and that outputs are made open for sharing and reuse.
+
+
 ## Some background - what do we mean by modelling?
 
 ### A typology - some definitions
+
+A typology proposed by Matthew Barclay (see annex) is:
+
+1. *Models developed by others* - this is where the bulk of our effort has gone (see below)
+2. *Statstical models* - this includes regression models, time series models and so on. Again we have done some work in this area
+3. *Machine learning models* - this is at the core of the development of data science but as yet has had little impact on PHEs work
+4. *Other mathematical models* - this includes the kinds of modelling done by the EDR team on environmental hazards
+
+Our activity is focussed on 1, and to a lesser degree 2, but we need to develop capability to do 2 and 3. There will always be a need to commission complex simulation and systematic dynamic models - but we need them to be developed so they can by *run* in house and we have the capability to understand how they work and interpret the results.
+
+### Some specifics
 
 There are many types of quantitative modelling which are relevant to the work of Public Health England and public health practice including:
 
@@ -54,16 +83,17 @@ There are many types of quantitative modelling which are relevant to the work of
 * *Econometric models* are statistical models used in econometrics. An econometric model specifies the statistical relationship that is believed to hold between the various economic quantities pertaining to a particular economic phenomenon under study. An econometric model can be derived from a deterministic economic model by allowing for uncertainty, or from an economic model which itself is stochastic. 
 
 
+
 ## Why model - the case for modelling?
 
 PHE's remit on behalf of government is to improve and protect health and reduce health inequality. It acts through a range of levers and tools including influencing policy and practice, prioritisaon, resource allocation, service design, intervention, behaviour change and so on. PHE needs to be able to systematically monitor current health, identifiy priorities for action, project and predict future health states,  test scenarios and hypotheses - all of these may need modelling.
 
 
-In public health practice and policy making we use models and modelling techniques for a range of purposes [@Webber14]:
+In public health practice and policy making we use or may need to models and modelling techniques for a range of purposes [@Webber14]:
 
-* **Filling data gaps** - for example obtaining estimates of disease frequency or burden where direct measurement maybe difficult or too costly.
-* **Projecting future health states** - trying to understand current and potential future trends in risk factors, health determinants and disease outcomes
-* **Testing interventions or policy options** - it can be very difficult to design controlled trials or 'gold standard' methodological design for evaluating interventions, so models can help in devising and testing scenarios, or altering levels of intervention, assessing impact and so on.
+* **Filling data gaps** - for example obtaining estimates of disease frequency or burden where direct measurement maybe difficult or too costly. For example, to monitor adult obesity as part of the Public Health Outceoms Frameowork (PHOF) we currently rely on an (expensive) survey. This does not provide data which is sufficiently granular or timely for our requirements. To fill the gap work on small area estimation of prevalence has been commissioned. There has been a limited amount of work on using exsiting sources and novel datasets to develop more timely estimates. We have developed national obesity estimates from a large sample GP dataset and cross checked these with the Health Survey for England.
+* **Projecting future health states** - trying to understand current and potential future trends in risk factors, health determinants and disease outcomes. Some work has been done using the projection tool in the UKHF model to predict future rates of obesity by age. These have then been used to try adn simulate future health states related to obesity such as diabetes, heart disease and overall life expectancy.
+* **Testing interventions or policy options** - it can be very difficult to design controlled trials or 'gold standard' methodological design for evaluating interventions, so models can help in devising and testing scenarios, or altering levels of intervention, assessing impact and so on. Previous work was done using the UKHF model (see below) to test scenarios of obesity, salt consumption and smoking. The Future of Ill Health Model also provides tools to help model scenarios.
 * **Understanding systems** - models (both qualitative and quantitative) can help us understand how systems *work* -  the dynamics and interactions of complex systems - often present in public health problems and solutions and this may help in understanding why interventions may or may not work and devise new innovations
 * **Testing and challenging assumptions** - all models are based on assumptions and some times these are not explicit and therefore not open to challenge. For example, 
 *  **Understanding costs** of future health states and savings from intervention
@@ -150,7 +180,7 @@ df_model <- data.frame(`Modelling activity` = c("Global burden of disease",
                        `PHE input` =c("Data provision to IHME, commissioning,  interpetation, networks, explanation,  publication",
                                "Data input, software development (by UKHF) to make model user friendly for PHE to run, limited projection and simulation", 
                                "Range of externally developed models for ROI and economic evaluation", 
-                               "Limited activity - early experimentation with machine learning, Commissioned prevalence estimates from Imperial and Southampton")
+                               "Limited activity - early experimentation with machine learning, Commissioned prevalence estimates from Imperial and Southampton"))
 
 
 
@@ -172,82 +202,76 @@ df_model %>%
 
 
 ### Annex
-My understanding is that the modelling work in PHE falls broadly into four categories. CKO modelling work is primarily in categories 1. and 2.
+
 1. Using models produced by others
-.	Dispersion modelling
-o	Dstl and MO are cross-gov leads on large scale dispersion modelling for deliberate and natural events respectively, for complex terrain and variable met. This means we take outputs from NAME/STE or HPAC on faith
-.	Stuff that is simply too complex to produce in-house
-o	Global burden of disease
-o	Climate projections
-o	Archimedes model 
-.	Predictive models - QRISK2, Framingham etc
-o	These are typically based on logistic regression
-.	Interpreting local estimates from prevalence and projection models
-I assume that most analytical and epidemiological staff can effectively use and interpret models and model results produced by others.
+    * Dispersion modelling
+         + Dstl and MO are cross-gov leads on large scale dispersion modelling for deliberate and natural events respectively, for complex terrain and variable met. This means we take outputs from NAME/STE or HPAC on faith
+    * Things that are simply too complex to produce in-house
+         + Global burden of disease
+         + Climate projections
+         + Predictive models - QRISK2, Framingham etc (These are typically based on logistic regression)
+    * Interpreting local estimates from prevalence and projection models
+
 2. Statistical models
-Stuff underlined and in red are things that, as far as I know, PHE has not done - though that is not to say that staff do not have those skills (eg. my MSc dissertation uses both mixed models and GEE)
-.	Standard statistical models
-o	Linear regression
-o	Generalised linear models
-???	Logistic regression
-???	Multinomial models
-???	Poisson regression
-o	Survival models
-???	Time-to-event models
-.	Cox regression
-.	Competing risks regression
-.	Accelerated failure time models
-???	Relative/net survival models
-o	More complex or unusual statistical models 
-???	Generalised additive models
-???	Mixed models 
-???	Population-average models (GEE)
-.	Time series methods
-o	ARIMA 
-o	Complex time series models (State-space etc)
-o	Forecasting methods (eg. age-period-cohort models, Holt-Winters method etc)
-.	Monte Carlo simulation
-o	Health economic models (though these may well be Bayesian)
-.	Structural equation modelling
-o	The Archimedes model appears to be a very complex example of SEM
-.	Bayesian statistical models
-o	Bayesian approaches to all other model types
-???	Markov chain Monte Carlo models
-This category includes most of the modelling work done by staff in CKO. It includes projections modelling, prevalence modelling etc.
-It looks like some of the Health Protection modellers have more experience in the more complex things on this list than CKO staff, particularly Bayesian models.
+     * Linear regression
+          + Generalised linear models
+          + Logistic regression
+          + Multinomial models
+          + Poisson regression
+     * Survival model
+          + Cox regression
+          + Competing risks regression
+          + Accelerated failure time models
+          + Relative/net survival models
+     * More complex or unusual statistical models 
+          + Generalised additive models
+          + Mixed models 
+          + Population-average models (GEE)
+    * Time series methods
+          + ARIMA 
+          + Complex time series models (State-space etc)
+    * Forecasting methods (eg. age-period-cohort models, Holt-Winters method etc)
+          + Monte Carlo simulation
+    * Health economic models (though these may well be Bayesian)
+    * Structural equation modelling
+    * Bayesian statistical models
+         + Markov chain Monte Carlo models
+
 3. Machine learning models
-.	Classification models
-o	Trees and random forests
-o	Cluster analysis
-o	Machine learning techniques
-o	Support Vector Machines
-o	Neural networks
-o	Image analysis 
-These can also be seen as statistical models, but I think are more viewed as machine learning; you can argue that all of machine learning is statistics if you want to - it annoys machine learning specialists and is quite fun. 
-While I call these classification models, they can be used for prediction.
-We don't seem to use these very often in CKO, but I've used classification trees and cluster analysis myself and Neo has used random forests. It looks like these may be used more by the Health Protection modelling teams.
+    * Supervised
+        + Classification and regression models
+            + Trees and decisions
+            + Random forests
+            + Support vector machines
+            + GLMnet
+            + CART
+            + Boosting and bagging
+            + Ensembles
+            + Neural networks and deep learning
+            
+    * Unsupervised
+        + Cluster analysis
+        + Principal components analysis
+        + Dimensionality reduction
+
+
 4. Other Mathematical models
-.	
-.	Mathematical modelling
-???	
-.	Special functions, probability theory 
-o	Dose response
-o	Random variable based analysis (convolutions)
-o.	ODEs and PDEs
-o	Dispersion models 
-???	Gaussian puff/plume models underpin the reverse epidemiology tools and are more simple version of dispersion models used by Dstl/MO mentioned above.
-o	Compartmental models
-???	Basic building blocks for epidemiological analysis, uses ODE basis
-o	Meta-population modelling
-o	Network modelling 
-o	Pseudo-individual models
-o	Stochastic ODEs and PDEs
-???	All of the above again
-o	Numerical models	
-???	Numerical simulation
-.	Agent based simulation
-.	Discrete event simulation
-.	Operational research models 
-I don't think any CKO staff specialise in these models. It looks like these may be used more by the Health Protection modelling teams.
+    * Mathematical modelling  
+    * Special functions, probability theory   
+      +	Dose response  
+      +	Random variable based analysis (convolutions)  
+      + ODEs and PDEs 
+      +	Dispersion models   
+      +	Gaussian puff/plume models underpin the reverse epidemiology tools and are more simple version of dispersion models used by Dstl/MO mentioned above.
+      +	Compartmental models  
+    *	Basic building blocks for epidemiological analysis, uses ODE basis  
+      +	Meta-population modelling  
+      +	Network modelling   
+      +	Pseudo-individual models  
+      +	Stochastic ODEs and PDEs  
+    *	Numerical models  	
+      + Agent based simulation  
+      + Discrete event simulation  
+      + Operational research models   
 
 
