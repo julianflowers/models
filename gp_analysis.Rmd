@@ -1,0 +1,568 @@
+---
+title: "Primary care indicators for public health  in QOF"
+author: "Julian Flowers"
+date: "07/11/2017"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+    latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, cache.lazy = FALSE, message = FALSE, warning = FALSE, comment = "#>", collapse = TRUE)
+```
+
+
+
+```{r load_packages}
+library(tidyverse)
+library(fingertipsR)
+library(stringr)
+library(kableExtra)
+library(data.table)
+```
+
+```{r load_data, cache = TRUE}
+
+## core fingertips dataset
+full_ds <- data.table::fread("~/Documents/R_projects/analytics/gpdata_analysis.csv")
+
+gp_meta <- data.table(indicator_metadata(ProfileID = 20))
+
+setkey(full_ds, IndicatorID, AreaCode)
+setkey(gp_meta, IndicatorID)
+
+## add metadata
+full_ds1 <- data.table(full_ds[gp_meta])
+
+
+## add deprivation scores
+gp_dep <- data.table(fingertipsR::deprivation_decile(AreaTypeID = 7))
+
+setkey(gp_dep, AreaCode)
+setkey(full_ds1, AreaCode)
+full_ds1 <- full_ds1[gp_dep]
+
+```
+
+
+
+
+```{r classify, cache = TRUE}
+
+## classifyfing indicators
+
+full_ds1 <- full_ds1 %>%
+  mutate(qof = case_when(str_detect(`Data source`, "[Qq][Oo][Ff]") ~ "QOF", 
+                                TRUE ~ "Other"), 
+        prevalence = case_when(str_detect(`Indicator full name`, "[Pp]revalence") ~ "Prevalence", 
+                                TRUE ~ "Other"), 
+        recording = case_when(str_detect(`Indicator full name`, "[Rr]ecord") ~ "Recording", 
+                                TRUE ~ "Other"),  
+        exception = case_when(str_detect(`Indicator full name`, "[Ee]xception") ~ "Exception", 
+                                TRUE ~ "Other"), 
+        demography = case_when(str_detect(`Indicator full name`, "% pop") ~ "Demography", 
+                                TRUE ~ "Other"), 
+        screening =  case_when(str_detect(`Indicator full name`, "[Ss]creen") ~ "Screening", 
+                                TRUE ~ "Other"), 
+        outcome =   case_when(IndicatorID %in% c(650, 90690, 90691, 90692, 90696, 90697, 90701, 90998, 91082, 90185, 91089, 91225, 91226, 91234) ~ "Outcome", TRUE ~ "Other"), 
+        sec_prev = case_when(IndicatorID %in% c(92594, 91284, 91232, 91230, 91288, 91223, 91013, 91006, 90999, 91000, 90702, 90619, 90617, 90609) ~ "Secondary prevention", TRUE ~ "Other"), 
+        ph_service = case_when(IndicatorID %in% c(92601, 92600, 91343, 91342, 91341, 91340, 91339, 92613:92604) ~ "PH services", 
+                              TRUE ~ "Other"), 
+        ph_priorities  = case_when(str_detect(`Indicator full name`, "[Cc]ancer") ~ "cancer", 
+                          str_detect(`Indicator full name`, "[Dd]iabetes") ~ "cvd", 
+                          str_detect(`Indicator full name`, "[Cc]ardio") ~ "cvd", 
+                          str_detect(`Indicator full name`, "[Hh]ypertension| [Bb][Pp]") ~ "bp", 
+                          str_detect(`Indicator full name`, "antibiotic") ~ "amr", 
+                          str_detect(`Indicator full name`, "smoking") ~ "risk factors",
+                          str_detect(`Indicator full name`, "obesity") ~ "risk factors",
+                          TRUE ~ "Other")) 
+```
+
+
+
+
+```{r}
+
+
+full_ds2 <- full_ds1 %>%
+  select(starts_with("Indicator"), starts_with("Definition"), ParentName, starts_with("Area"), TimeperiodSortable, Value, Count, Denominator, contains("limit"), IMDscore, Polarity, qof:ph_priorities )
+
+
+
+## clean up
+
+rm(full_ds)
+#rm(full_ds1)
+```
+
+
+
+```{r correlate}
+
+## correlations with deprivation score
+# full_ds2 %>%
+#   group_by(IndicatorID.x) %>%
+#   do(broom::tidy(cor.test(.$Value, .$dep))) %>%
+#   ungroup() %>%
+#   mutate_if(is.numeric, round, 2) %>%
+#   filter(p.value < 0.5) %>%
+#   arrange(-estimate)  %>%
+#   left_join(indicators, by = c("IndicatorID.x" = "IndicatorID")) %>%
+#   select(-c(DomainID:ProfileName)) %>%
+#   distinct() %>%
+#   select(IndicatorName, everything())
+# 
+# 
+
+#%>%
+ # knitr::kable(caption = "Indicators significantly correlated with practice deprivation score", format = "asis") 
+
+
+```
+
+
+
+```{r regression on deprivation}
+
+## indicators with a significant assn with deprivation
+dep_regression <- full_ds2 %>%
+    group_by(IndicatorID, IndicatorName,  TimeperiodSortable) %>%
+  filter(IndicatorID != 91872) %>%
+  select(IndicatorID, IndicatorName, IMDscore, Value, TimeperiodSortable) %>%
+  na.omit() %>%
+  do(broom::glance(lm(Value ~ IMDscore, .))) %>%
+ # filter(term == "dep") %>%
+  select(IndicatorID, TimeperiodSortable, adj.r.squared, p.value) %>%
+  mutate_if(is.numeric, round, 3) %>%
+  group_by(IndicatorID) %>%
+  filter(TimeperiodSortable == max(TimeperiodSortable)) %>%
+  arrange(-adj.r.squared, p.value)
+
+dep_regression1 <- full_ds2 %>%
+    group_by(IndicatorID, IndicatorName,  TimeperiodSortable) %>%
+  filter(IndicatorID != 91872) %>%
+  select(IndicatorID, IndicatorName, IMDscore, Value, TimeperiodSortable) %>%
+  na.omit() %>%
+  do(broom::tidy(lm(Value ~ IMDscore, .))) %>%
+  filter(term == "IMDscore") %>%
+  select(IndicatorID, TimeperiodSortable, estimate, p.value) %>%
+  mutate_if(is.numeric, round, 3) %>%
+  group_by(IndicatorID) %>%
+  filter(TimeperiodSortable == max(TimeperiodSortable)) %>%
+  arrange(-estimate)
+
+
+dep_reg <- dep_regression %>%
+  left_join(dep_regression1)
+
+library(openxlsx)
+openxlsx::write.xlsx(dep_reg, "dep_reg.xlsx")
+
+
+
+
+# dep_regression %>%
+#   ggplot(aes(estimate, reorder(IndicatorName, estimate))) +
+#   geom_point() +
+#   theme(axis.text.y = element_text(size = 4))
+#   
+
+```
+
+
+
+```{r}
+summary_stats <- full_ds2 %>%
+  filter(qof == "QOF", exception == "Other") %>%
+  group_by(IndicatorID, IndicatorName) %>%
+  filter(TimeperiodSortable == max(TimeperiodSortable), 
+         !AreaName == "England", 
+         AreaType == "GP") %>%
+  summarise(Practice_count = n(),
+            `Total cases` = sum(Count, na.rm = TRUE),
+            `Average cases per practice` = mean(Count, na.rm = TRUE), 
+            `Total population` = sum(Denominator, na.rm = TRUE), 
+            `Mean value` = mean(Value, na.rm = TRUE), 
+            Range = max(Value, na.rm = TRUE) - min(Value, na.rm = TRUE), 
+            `Inter quartile range` = quantile(Value, probs = 0.75, na.rm = TRUE) - quantile(Value, probs = 0.25, na.rm = TRUE), 
+            SD = sd(Value, na.rm = TRUE), 
+            `Coefficient of variation` = SD/`Mean value`, 
+            `Average sample size` = mean(Denominator, na.rm = TRUE), 
+            Gini = ineq::Gini(Value, na.rm = TRUE),
+            #`Correlation with deprivation` = cor(Value, IMDscore, use = "complete.obs")
+            ) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  #left_join(dep_reg, by = "IndicatorID") %>%
+  arrange(-`Coefficient of variation`) 
+
+#View(unique(full_ds$`Indicator full name`))
+
+openxlsx::write.xlsx(summary_stats, "gp__summary_data.xlsx")
+
+
+
+
+
+```
+
+
+
+# Prioritising primary care indicators for public health
+
+There are a number of indicators calculated for general practice populations in use by the public health system. Many of these are developed for the Quality and Outcomes Framework (QOF) but there are other sources. Work is ongoing to help prioritise the use of these data to support initiatives like "Incentivising Prevention", and supporting new models of care and the emergent population health management approaches.  
+
+This short paper sets out a framework for prioritisation we hope will contribute to these discussions. The examples are based on indicators already published in [Fingertips](https://fingertips/phe.org.uk). It should be noted that a range of indicators and data at general practice level are published internally by NHSE through the [Primary Care Web Tool](https://www.primarycare.nhs.uk/), and externally by CQC, and NHS Digital, and that the way in which these data are made available has been reviewed by the [Health Foundation](http://www.health.org.uk/publication/indicators-quality-care-general-practices-england). The Health Foundation commissioned Dr Foster Intelligence to critique a sample of indicators, and they found many were not robust or useful.  
+
+## GP data in Fingertips
+
+```{r indicator stats, cache=TRUE}
+
+full_ds2 %>%
+  select(IndicatorID.x) %>%
+  unique() -> indlist
+
+metadata <- fingertipsR::indicator_metadata(IndicatorID = indlist$IndicatorID)
+indicators <- indicators()
+no_inds <- length(unique(metadata$IndicatorID))
+profiles <- unique(filter(indicators, IndicatorID %in% indlist$IndicatorID) )
+
+qof_meta <- metadata %>%
+  janitor::clean_names() %>%
+  mutate(qof = str_detect(data_source, "[Qq][Oo][Ff]"))
+
+qof_prop <- sum(qof_meta$qof)
+```
+
+At the time of writing there was data available for `r no_inds` indicators via the [Fingertips](https://fingertips.phe.org.uk)  
+
+Using the [Fingertips API](https://fingertips.phe.org.uk/api) and the `fingertipsR` package it is possible to identify and download all the published GP data (note this is a very large file). Most GP data is available through 5 profiles:
+
+* [National General Practice Profiles (NGPP)](https://fingertips.phe.org.uk/profile/general-practice)
+* [Cardiovascular profiles](https://fingertips.phe.org.uk/profile/cardiovascular)
+* [Diabetes profiles](https://fingertips.phe.org.uk/profile/diabetes)
+* [Cancer services](https://fingertips.phe.org.uk/profile/cancerservices)
+* [Healthierlives](https://healthierlives.phe.org.uk/)
+
+Of the GP indicators available `r qof_prop` are derived from QOF.
+
+The full list of indicators is in the [appendix](# appendix)
+
+# Proposed framework for prioritisation
+
+## Relevant indicators
+
+### Population health indicators from QOF 
+
+QOF indicators have been part of a pay-for-performance scheme where practices have received payment for achievement on a range of indicators. Practices have been allowed to except cases (although these exceptions are automatically extracted from practice systems) - this effectively reduces the population at risk. For public health purposes however, we publish the  *intervention* rate[ref] which is achivement per total population at risk. This means that values published in practice profiles will differ from achievment scores published by NHSD or as part of the primary care web tool. We always publish exception rates alongside intervention rates.
+
+There are two reasons for this:
+
+1. Exception rates vary widely between practices - far more than you would expect by chance alone (see figure). This is not to say that there are not legitimate reasons why patients should be excluded from receiving certain treatments or interventions. 
+2. It is a fairer comparative measure of *population* performance.
+
+The figure shows for example that:
+
+* For some indicators - cancer, bp indicators, asthma - exception rates are low, distributions are narrow
+* For others like depression inter-practice variation in exception rates vary between 0 and over 50%. An exception rate of 50% means that the achievement rate is doubled compared to a practice with a zero exception rate.
+
+```{r exceptions, fig.cap="Exception rates", message=FALSE, warning=FALSE}
+
+library(ggridges)
+
+full_ds2 %>%
+  filter(qof == "QOF", exception != "Other", str_detect(`Indicator full name`, "^Exception")) %>%
+  ggplot(aes(Value, forcats::fct_reorder(`Indicator`, Value, fun = median, na.rm = TRUE) )) +
+  geom_density_ridges(scale = 4, rel_min_height = 0.003, alpha = 0.4 ) +
+  theme_ridges() + 
+  theme(axis.text.y = element_text(size = 6)) +
+  labs(y = "", 
+       title = "Exception rate distribution ranked \nby median rate")
+
+```
+
+```{r exception_correlations, fig.cap= "Correlogram of practice exception rates"}
+
+library(ggridges)
+library(corrr)
+
+full_ds2 %>%
+  filter(qof == "QOF", AreaType == "GP", exception != "Other", str_detect(`Indicator full name`, "^Exception"), 
+         Indicator != "Exception rate for CKD indicators - retired") %>%
+  select(Indicator, AreaCode, Value, TimeperiodSortable) %>%
+  group_by(Indicator, AreaCode) %>%
+  filter(TimeperiodSortable == max(TimeperiodSortable)) %>%
+  distinct() %>%
+  na.omit() %>%
+  #slice(c(139945, 140154))
+  spread(Indicator, Value) %>%
+  ungroup() %>%
+ select(`Exception rate for asthma indicators`:`Exception rate for the cervical screening indicator`) %>%
+ correlate() %>%
+  corrr::as_matrix() %>%
+  corrplot::corrplot(tl.cex = .4, tl.col = "black")
+  
+  
+  
+  
+  
+```
+
+There is limited evidence that high exception rates cluster.
+
+
+## Proposed indicator framework
+
+We propose 7 groups of indicators which support public health activity. They are not mutually exclusive.  
+
+1. Indicators of disease or risk factor frequency or burden including disease prevalence, and some cases where  estimates *incidence* can be constructed from QOF indicators
+2. Indicators of population health outcome e.g. diabetes or hypertension control  
+3. Indicators of secondary prevention e.g. proportion of people at risk receiving effective preventive care or uptake of effective interventions
+4. Indicators relevant for public health services  (screening and smoking cessation)
+5. Indicators relevant to PHE's programmes and priorities (e.g. BP, CVD, and cabcer indicators) 
+6. Indicators of inequality and inequity    
+7. Indicators of data collection and quality (e.g. recording rates) 
+
+QOF indicator frequencies are shown in the table.
+
+```{r}
+
+full_ds2 %>% 
+  select(IndicatorID.x, qof:ph_priorities) %>%
+  gather(metrics, Group, prevalence:ph_priorities ) %>%
+  filter(qof != "Other") %>%
+  distinct() %>%
+  group_by(Group) %>%
+  tally() %>%
+  filter(Group != "Other") %>%
+  arrange(-n) %>%
+ knitr::kable()
+
+
+```
+
+
+## Quantitative criteria
+
+
+
+# Variation 
+
+## Disease and risk factors
+
+The majority of prevalence estimates are gathered into the [Disease and risk factor prevalence profile](https://fingertips.phe.org.uk/profile/prevalence).  The variation is shown in figure 1.
+
+
+```{r prev_plot, fig.cap="Variation in disease and risk factor prevalence", fig.height= 6}
+
+library(ggridges)
+library(govstyle)
+
+prev_ds <- full_ds2 %>%
+  filter(!prevalence == "Other", 
+         qof == "QOF", 
+         !str_detect(Indicator, "detected"))
+
+options(scipen = 999)
+prev_ds %>%
+  ggplot(aes(forcats::fct_reorder(Indicator, Value, fun = median, na.rm = TRUE), Value)) +
+  geom_boxplot(outlier.size = .1, fill = "goldenrod", notch = TRUE) +
+  labs(title = "Variation in disease prevalence by GP practice", 
+       x = "", 
+       y = "Prevalence (%)") +
+  coord_flip() +
+  theme_gov() +
+  #scale_fill_cyclical(values = c("goldenrod", "blue")) +
+  theme(axis.text = element_text(size = 10))  +
+    #scale_y_log10()  +
+    expand_limits(y = c(0.001, 100))
+
+
+
+
+
+
+```
+
+This shows for example:
+
+
+
+## Indicators of outcome
+
+```{r outcome_plot,  fig.cap="Variation in outcomes", fig.height= 8}
+library(govstyle)
+
+out_ds <- full_ds2 %>%
+  filter(!outcome == "Other", qof == "QOF", 
+         !str_detect(Indicator, "people with diabetes"))
+
+options(scipen = 999)
+
+out_ds %>%
+  ggplot(aes(forcats::fct_reorder(Indicator, Value, fun = median, na.rm = TRUE), Value)) +
+  geom_boxplot(outlier.size = .1, fill = "goldenrod", notch = TRUE) +
+  labs(title = "Variation in disease outcome metrics by GP practice", 
+       x = "", 
+       y = "Prevalence (%)") +
+  coord_flip() +
+  theme_gov() +
+  #scale_fill_cyclical(values = c("goldenrod", "blue")) +
+  theme(axis.text = element_text(size = 16))  
+
+
+    #scale_y_log10()  +
+    #expand_limits(y = c(10, 100))
+
+```
+
+## Secondary prevention
+
+```{r secPrev_plot, fig.cap="Figure 3: Variation in secondary prevention uptake"}
+
+secPrev_ds <- full_ds2 %>%
+  filter(IndicatorID.x %in% c(91222, 91083, 91248, 
+                              91013, 91228, 91005, 
+                              91230, 92594, 91232, 
+                              91233, 91230, 91005))
+
+options(scipen = 999)
+secPrev_ds %>%
+  ggplot(aes(forcats::fct_reorder(Indicator, Value, fun = median, na.rm = TRUE), Value)) +
+  geom_boxplot(outlier.size = .1, fill = "goldenrod",  notch = TRUE) +
+  labs(title = "Variation in secondary prevention metrics by GP practice", 
+       x = "", 
+       y = "Prevalence (%)") +
+  coord_flip() +
+  theme_gov() +
+  #scale_fill_cyclical(values = c("goldenrod", "blue")) +
+  theme(axis.text = element_text(size = 8))
+
+secPrev_ds %>%
+  group_by(Indicator) %>%
+  summarise(num = mean(Count, na.rm = TRUE)) %>%
+  ggplot(aes(num, reorder(Indicator, num))) +
+  geom_point() +
+  theme_gov() +
+  labs(y = "", 
+       x = "Average numerator")
+
+```
+
+
+For some secondary prevention indicators, denominators are small (< 30 patients per practice on average).
+
+These include:
+
+* Fragility fracture treated with bone sparing agent
+* Heart failure with LVD treated with ACE inhibitors
+* Patients with history of MI treated with ACE inhibitors
+* AF treated with anticoagulants if CHADS2 = 1
+
+These indicators do give an estimate of populations at risk. For example, around:
+
+* 42,000 people over 75 are recorded as having osteoporosis in general practice computer systems
+* 103,000 people are recorded as having heart failure
+* 155,000 people have a history of MI since 2011
+* 400,000 people are registered with atrial fibrillation
+* 640,000 people have a history of stroke
+* Over 1 million people are registered as having COPD
+* 1.8 million people are on the CHD register
+* 2.8 million people are registered with diabetes
+* Nearly 9 million people are recorded as being a current smoker
+
+## Service indicators
+
+
+```{r services_plot, fig.cap= "Variation in service utilisation and public health serivces, including screening", fig.height= 7}
+
+library(ggridges)
+library(govstyle)
+
+
+service_ds <- full_ds2 %>%
+  filter(IndicatorID.x %in% c(91261, 91341, 91339, 
+                              91340, 92601, 91342,
+                              91343, 91000, 91229, 
+                              90617, 91087, 90702, 
+                              90609))
+service_ds %>%
+  ggplot(aes(forcats::fct_reorder(Indicator, Value, fun = median, na.rm = TRUE), Value )) +
+  geom_boxplot(fill = "goldenrod", notch = TRUE) +
+  coord_flip() + 
+ #geom_density_ridges(scale = 2, rel_min_height = 0.01, alpha = .6) +
+  labs(title = "Variation in service uptake by GP practice", 
+       x = "") +
+  theme_gov() +
+  theme(axis.text.y = element_text(size = 10))
+
+
+
+
+
+```
+
+
+
+
+## Additional indicators relevant to PHE priorities
+
+```{r, fig.cap= "Variation in indicators relevant to PHE priorities" }
+
+phe_ds <- full_ds2 %>%
+  filter(!ph_priorities == "Other") %>%
+  filter(TimeperiodSortable == max(TimeperiodSortable)) %>%
+  mutate(var_name = paste(IndicatorName, "-", substr(TimeperiodSortable, 1, 4)))
+
+phe_ds %>%
+  ggplot(aes(forcats::fct_reorder(var_name, Value, fun = median, na.rm = TRUE), Value )) +
+  geom_boxplot(fill = "goldenrod", notch = TRUE) +
+  coord_flip() + 
+ #geom_density_ridges(scale = 2, rel_min_height = 0.01, alpha = .6) +
+  labs(title = "Variation in PHE priority related indicators by GP practice", 
+       x = "") +
+  theme_gov() +
+  theme(axis.text.y = element_text(size = 6))
+
+
+
+
+
+
+```
+
+## Summary statistics by indicator
+
+```{r}
+options(digits = 2)
+summary_stats %>%
+  select(-TimeperiodSortable, -IndicatorName.y, -IndicatorID.x) %>%
+  knitr::kable()
+
+
+
+```
+
+
+## Appendix
+
+```{r}
+qof_meta %>%
+  select(indicatorid, indicator, qof) %>%
+  left_join(indicators, by = c("indicatorid" = "IndicatorID")) %>%
+  arrange(indicatorid) %>%
+  filter(ProfileID %in% c(21, 37, 20, 51, 67, 92 )) %>%
+  select(indicatorid, indicator, ProfileName, qof) %>%
+  distinct() %>%
+  knitr::kable()
+
+
+```
+
+
