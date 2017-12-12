@@ -1,3 +1,6 @@
+## Extracts all data at GP level from Fingertips
+## NB can take ~ 20 mins
+
 library(tidyverse)
 library(fingertipsR)
 
