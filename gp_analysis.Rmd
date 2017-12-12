@@ -18,7 +18,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE, cache = TRUE, cache.lazy = FALSE, message = FALSE, warning = FALSE, comment = "#>", collapse = TRUE)
 ```
 
-
+# Load packages
 
 ```{r load_packages}
 library(tidyverse)
@@ -27,6 +27,8 @@ library(stringr)
 library(kableExtra)
 library(data.table)
 ```
+
+# Load and build data
 
 ```{r load_data, cache = TRUE}
 
@@ -51,7 +53,7 @@ full_ds1 <- full_ds1[gp_dep]
 
 ```
 
-
+# Classify indicators
 
 
 ```{r classify, cache = TRUE}
@@ -86,7 +88,7 @@ full_ds1 <- full_ds1 %>%
 ```
 
 
-
+# Select fields for analysis
 
 ```{r}
 
@@ -127,7 +129,7 @@ rm(full_ds)
 
 ```
 
-
+# Calculate regression coefficients and R2 for all indicators vs IMDscore
 
 ```{r regression on deprivation}
 
@@ -176,7 +178,7 @@ openxlsx::write.xlsx(dep_reg, "dep_reg.xlsx")
 
 ```
 
-
+# Generate summary stats for each indicator
 
 ```{r}
 summary_stats <- full_ds2 %>%
