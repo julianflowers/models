@@ -9,7 +9,7 @@ output:
   html_document:
     number_sections: yes
     toc: yes
-title: "Building public health modelling capability and capacity in PHE"
+title: "Risk factor modelling in PHE"
 ---
 
 ```{r setup, include=FALSE}
@@ -34,9 +34,87 @@ library(ztable)
 
 # Introduction
 
-Modelling is increasingly important in public health practice and policy and we argue will become a larger part of PHE's work and remit over the next few years. By "model" we mean a simplification of reality and we are generally referring to quantitative - numerical models, although qualitative models are important to, for example, define the system we are trying to measure.
+Models are simplifications of reality which allow us to describe, explain, simulate and predict how systems work. Population and public health systems are inherhently complex interplays of individual, environmental and social factors so if we want to try and understand how for example changes in health behaviour may inlfuence changes in health outcomes we inevitably need to construct some kind of model to help us understand what may happen - there is often not a simple linear relationship (for example, changes in smoking behaviour do no translate into comcomitant changes in mortality outcomes because there is a more complex shift in the distribution and temporality of risk).
 
-This paper:
+For PHE modelling is increasingly important. PHE is committed to make the case for prevention and supporting investment by local authorities and others to improve health and tackle health inequalities. In order to do this we need to understand trends in risk factors and morbidity; we need to make forecasts about future levels of risk, disease, burden and outcome; we need evidence of effective interventions and their uptake to estimate their impact, and we need to evaluate the effect on cost and return on investment. To do this we need public health and heath economic modelling and we need qauntification.
+
+PHE has prioritised tackling the risk factors with the largest contribution to disease burden or mortality. Some of these are clinical, some behaviourl and some environmental. 
+* Smoking
+* Alcoohl consupmption
+* Overwwieght and obeity
+* Diet (especially sugar)
+* UNderactivity
+* Hypertension
+* Atrial fibrillation
+* Diabetes
+* AIr pollution
+* Early years
+* Mental ill health
+
+Often they are related - for example, alcohol consumption increases the prevalence of hypertension, smoking and alochol (independently and interactively) cause heart disease which underlies atrial fibtillation,  overweight and undeactivity contribute to diabetes and so on, so models which accounts for these relationships and interactions may be necessary but are inevitably more complex and data hugry.
+
+
+### A typology of models
+
+A proposed.
+
+1. *Models developed by others* - this is where the bulk of our effort has gone (see below)
+2. *Statstical models* - this includes regression models, time series models and so on. Again we have done some work in this area
+3. *Machine learning models* - this is at the core of the development of data science but as yet has had little impact on PHEs work
+4. *Other mathematical models* - this includes the kinds of modelling done by the EDR team on environmental hazards for example of plumes caused by fires or toxic releases
+
+Type 1. Too complex for us to build but need skills to run and interpret. Data hungry and need data linking risk with outcome so tend ot use HSE as care data. can be built in spreadsheets, with statistical tools like R or as bespoke software developments like UKHF models.
+
+Current examples:
+
+* UKHF Midrif model. Designed to predict a range of outcomes - disease, mortality adn cost - for single risk factors. A microsimulation model - that is it creates a distribtiun of populations with a set of characteristics who are aged over a lifetime and experience a set of events - birth, deaths, acquisition of ddisease and so on. It can account forthe templral relationship between risks and disease. It generally simulates large populations (say 20 million) and gives precise results. This model was used to estimate the impact of various scenarios tackling obesity, smoking and salt consumption, and a cut down version for air pollution. 
+
+The model is potentially very powerful and PHE owns the software licence, but the model is enorumously complex and our experience is that it requires at least one FULL TIME analyst to lear and run the model in its current form for us to benefit. The licence require software development on the part of UKHF to simplify thte user interface so that anlaysts in PHE can more easily run the model. This work is only part complete. If the model were considerablyt more user firendly then we cuold run a wide range of scenarios on national and simulated local populations. 
+
+THe model has 2 parts - forcasting risk factors and simulating health outcomes and costs. The forecasting risk factors is relatively straightforward compared to the full simulation and there has been some rcent owr on obesity forecasts using the UKHF tool fed with GP data from teh THIN database (a laorge database of GP records containing  ~ 36 miliion BMI measurements) and comparision with the Health Survey for Enfalnd.
+
+The figures belw show obesity projections based no model fitting to 12 years of THIN frmo 2004 (whe QOF began) to 2016 data for men and women aged 55-59. If ttrends contineu as they are by 2035 60% of men and 55% of women in this age group will be obese.
+
+
+![](bm1proj.png)
+
+
+
+
+
+
+![](bm1proj1.png)
+
+
+Our activity is focussed on 1, and to a lesser degree 2, but we need to develop capability to do 2 and 3. There will always be a need to commission complex simulation and systematic dynamic models - but we need them to be developed so they can be run in house and we have the capability to understand how they work and interpret the results.
+
+
+
+## Current activity
+
+There a currently 3 models of increasing complexity designed to help us assess the impact of tackling these 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 1. Describes the rationale for PH modelling
 2. Presents a stock-take of current modelling activity
@@ -56,6 +134,27 @@ A strategic approach to modelling would read across to wider strategies on, for 
 * Data science - developing the platforms, tools, capacity and skills to make the best use of data we collect or reuse
 
 It will ensure we have the input data to build models and that outputs are made open for sharing and reuse.
+
+
+## Modelling risk factors
+
+Tobacco, alcohol, obesity
+
+### Prevalence
+
+Surveys
+GP data
+New tools
+Granular and contemporaneous
+
+GBD
+
+### Forecasts and projections
+
+* UKHF - single and multiple
+* 
+
+### 
 
 
 ## Some background - what do we mean by modelling?
@@ -203,75 +302,14 @@ df_model %>%
 
 ### Annex
 
-1. Using models produced by others
-    * Dispersion modelling
-         + Dstl and MO are cross-gov leads on large scale dispersion modelling for deliberate and natural events respectively, for complex terrain and variable met. This means we take outputs from NAME/STE or HPAC on faith
-    * Things that are simply too complex to produce in-house
-         + Global burden of disease
-         + Climate projections
-         + Predictive models - QRISK2, Framingham etc (These are typically based on logistic regression)
-    * Interpreting local estimates from prevalence and projection models
-
-2. Statistical models
-     * Linear regression
-          + Generalised linear models
-          + Logistic regression
-          + Multinomial models
-          + Poisson regression
-     * Survival model
-          + Cox regression
-          + Competing risks regression
-          + Accelerated failure time models
-          + Relative/net survival models
-     * More complex or unusual statistical models 
-          + Generalised additive models
-          + Mixed models 
-          + Population-average models (GEE)
-    * Time series methods
-          + ARIMA 
-          + Complex time series models (State-space etc)
-    * Forecasting methods (eg. age-period-cohort models, Holt-Winters method etc)
-          + Monte Carlo simulation
-    * Health economic models (though these may well be Bayesian)
-    * Structural equation modelling
-    * Bayesian statistical models
-         + Markov chain Monte Carlo models
-
-3. Machine learning models
-    * Supervised
-        + Classification and regression models
-            + Trees and decisions
-            + Random forests
-            + Support vector machines
-            + GLMnet
-            + CART
-            + Boosting and bagging
-            + Ensembles
-            + Neural networks and deep learning
-            
-    * Unsupervised
-        + Cluster analysis
-        + Principal components analysis
-        + Dimensionality reduction
+![](bmi.png)
 
 
-4. Other Mathematical models
-    * Mathematical modelling  
-    * Special functions, probability theory   
-      +	Dose response  
-      +	Random variable based analysis (convolutions)  
-      + ODEs and PDEs 
-      +	Dispersion models   
-      +	Gaussian puff/plume models underpin the reverse epidemiology tools and are more simple version of dispersion models used by Dstl/MO mentioned above.
-      +	Compartmental models  
-    *	Basic building blocks for epidemiological analysis, uses ODE basis  
-      +	Meta-population modelling  
-      +	Network modelling   
-      +	Pseudo-individual models  
-      +	Stochastic ODEs and PDEs  
-    *	Numerical models  	
-      + Agent based simulation  
-      + Discrete event simulation  
-      + Operational research models   
+
+
+
+![](dm.png)
+
+![](bmihse.png)
 
 

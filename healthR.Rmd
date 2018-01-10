@@ -1,0 +1,71 @@
+---
+title: "R packages and APIs for health data"
+author: "Julian Flowers"
+date: "10/01/2018"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+ipak <- function(pkg){
+new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+sapply(pkg, require, character.only = TRUE)
+}
+
+packages <- c("fingertipsR", "eurostat", "openair",  "WHO", "rHealthDataGov", "rEHR", "healthcareai", "rClinicalCodes" )
+
+ipak(packages)
+
+if(!require(rEHR))devtools::install_github("rOpenHealth/rEHR")
+
+library(WHO)
+library(eurostat)
+library(openair)
+library(fingertipsR)
+library(rHealthDataGov)
+library(rEHR)
+library(healthcareai)
+library(rClinicalCodes)
+
+
+```
+
+# Introduction
+
+
+https://www.r-bloggers.com/analyzing-public-health-data-in-r/
+
+https://www.r-bloggers.com/analyze-the-behavioral-risk-factor-surveillance-system-brfss-with-r-and-monetdb/
+
+https://bookdown.org/medepi/phds/
+
+https://rpubs.com/hlennon/Introduction_to_R_for_health_data
+
+https://github.com/rOpenHealth/rEHR
+
+https://rpubs.com/alecri/introR
+
+http://rforpublichealth.blogspot.co.uk/
+
+https://aheblog.com/2016/03/17/fermi-problems-and-public-health/
+(Guesstimation)
+
+## Fingertips API and fingertipsR
+
+## WHO
+
+## Eurostat
+
+## Airquality
+
+## NOMIS API
+
+## Healthcare
+
+## Big data/ bioinformatics
